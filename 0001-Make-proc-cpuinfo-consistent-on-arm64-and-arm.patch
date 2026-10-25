@@ -1,0 +1,28 @@
+From 6f94c287153c1dd4ff6d12a6625c5317ca27d888 Mon Sep 17 00:00:00 2001
+From: graysky <therealgraysky AT proton DOT me>
+Date: Fri, 12 Dec 2025 05:28:24 -0500
+Subject: [PATCH] consistent model name on arm and arm64
+
+https://github.com/raspberrypi/linux/issues/3991
+
+---
+ arch/arm64/kernel/cpuinfo.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/arch/arm64/kernel/cpuinfo.c b/arch/arm64/kernel/cpuinfo.c
+index cd19c2b8353a..c20929d03324 100644
+--- a/arch/arm64/kernel/cpuinfo.c
++++ b/arch/arm64/kernel/cpuinfo.c
+@@ -226,8 +226,7 @@ static int c_show(struct seq_file *m, void *v)
+ 	 * "processor".  Give glibc what it expects.
+ 	 */
+ 	seq_printf(m, "processor\t: %d\n", cpu);
+-	if (compat)
+-		seq_printf(m, "model name\t: ARMv8 Processor rev %d (%s)\n",
++	seq_printf(m, "model name\t: ARMv8 Processor rev %d (%s)\n",
+ 			   MIDR_REVISION(midr), COMPAT_ELF_PLATFORM);
+ 
+ 	seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
+-- 
+2.52.0
+
