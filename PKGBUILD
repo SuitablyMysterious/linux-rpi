@@ -5,12 +5,15 @@
 # Contributer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
 # Contributer: Ben Schneider <ben@bens.haus>
 
+: "${_use_llvm_lto:=thin}"
+
+
 pkgbase=linux-rpi
 _commit=e752d5801648651cd65abb727ecc63e9080cbea2
 _srcname=linux-${_commit}
 _kernelname=${pkgbase#linux}
 pkgver=6.18.58
-pkgrel=1
+pkgrel=2
 pkgdesc='Linux'
 url="https://github.com/raspberrypi/linux"
 arch=(armv7h aarch64)
@@ -24,7 +27,7 @@ makedepends=(
   llvm
   lld
 )
-options=('!strip')
+options=('!strip' '!debug' '!lto')
 source=("linux-$pkgver-${_commit:0:10}.tar.gz::https://github.com/raspberrypi/linux/archive/${_commit}.tar.gz"
         cmdline.txt
         config.txt
@@ -49,11 +52,13 @@ elif [[ $CARCH == "aarch64" ]]; then
   _kernel=kernel8.img KARCH=arm64 _image=Image _config=config8 _boot=config8.txt
 fi
 
+
 _make_flags=(
 	ARCH=arm64
 	LLVM=1
 )
 
+_die() { error "$@" ; exit 1; }
 
 prepare() {
   cd "${srcdir}/${_srcname}"
@@ -87,7 +92,21 @@ prepare() {
   else
     make "${_make_flags[@]}" bcm2711_defconfig
     cat ../archarm.diffconfig >> .config
+    echo "Selecting '$_use_llvm_lto' LTO mode..."
+    case "$_use_llvm_lto" in
+      thin) scripts/config -d LTO_NONE -e LTO_CLANG_THIN ;;
+      full) scripts/config -d LTO_NONE -e LTO_CLANG_FULL ;;
+      none) ;;
+      *) _die "invalid _use_llvm_lto '$_use_llvm_lto' (thin, full or none)" ;;
+    esac
     make "${_make_flags[@]}" olddefconfig
+    echo "Selecting '$_use_llvm_lto' LTO mode..."
+    case "$_use_llvm_lto" in
+      thin) scripts/config -d LTO_NONE -e LTO_CLANG_THIN ;;
+      full) scripts/config -d LTO_NONE -e LTO_CLANG_FULL ;;
+      none) ;;
+      *) _die "invalid _use_llvm_lto '$_use_llvm_lto' (thin, full or none)" ;;
+    esac
   fi
 
   make -s "${_make_flags[@]}" kernelrelease > version
@@ -179,6 +198,7 @@ _package-headers() {
   pkgdesc="Headers and scripts for building modules for Linux kernel"
   provides=("linux-headers=${pkgver}")
   conflicts=('linux-headers' 'linux-rpi-16k-headers')
+  depends=(clang llvm lld)
 
   cd ${_srcname}
   local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
