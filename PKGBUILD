@@ -8,6 +8,7 @@
 : "${_use_llvm_lto:=thin}"
 
 
+
 pkgbase=linux-rpi
 _commit=e752d5801648651cd65abb727ecc63e9080cbea2
 _srcname=linux-${_commit}
@@ -23,6 +24,7 @@ makedepends=(
   pahole
   kmod
   inetutils
+  ccache
   clang
   llvm
   lld
@@ -56,6 +58,8 @@ fi
 _make_flags=(
 	ARCH=arm64
 	LLVM=1
+	CC="ccache clang"
+	CXX="ccache clang++"
 )
 
 _die() { error "$@" ; exit 1; }
