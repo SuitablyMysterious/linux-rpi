@@ -20,7 +20,9 @@ makedepends=(
   pahole
   kmod
   inetutils
-  aarch64-linux-gnu-gcc
+  clang
+  llvm
+  lld
 )
 options=('!strip')
 source=("linux-$pkgver-${_commit:0:10}.tar.gz::https://github.com/raspberrypi/linux/archive/${_commit}.tar.gz"
@@ -37,7 +39,7 @@ sha256sums=('60e37bea9d7b1c4f595add8a4b7e810c26efaf9c7e19e35c328720b598a85923'
             'ff6d10ac64512b0da204a9ce43892ef28bc63c0597888df606af3db279d547de'
             '29956d87ef394fef3dbd9e363391ba260b08369e10019be25019e311781c6476'
             '184ee4f680eb32c99f159773b711cff200426cec7a565bd04711558ca74c381e'
-            'd9e64ca6cf57d3d5d01673f6b959c721aa885735048b9ac2d8374d1289afca28')
+            'bd538957398c9bc955b04678d802853b96e016a410855c4c054b14e3ef1c7a48')
 
 # setup vars
 CARCH="aarch64"
@@ -49,7 +51,7 @@ fi
 
 _make_flags=(
 	ARCH=arm64
-	CROSS_COMPILE=aarch64-linux-gnu-
+	LLVM=1
 )
 
 
